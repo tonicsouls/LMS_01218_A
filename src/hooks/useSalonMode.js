@@ -6,7 +6,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-const BUFFER_PERCENT = 0.15; // 15% extra time
+const BUFFER_PERCENT = 0.17; // 17% extra time (superior timing)
 
 export function useSalonMode(block, audioRef, onAutoAdvance) {
     const [salonModeEnabled, setSalonModeEnabled] = useState(false);

@@ -9,6 +9,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useBlock, getBlocksForHour } from '../hooks/useBlock';
 import { useProgressStore } from '../stores/ProgressStore';
 import { useSalonMode } from '../hooks/useSalonMode';
+import { useGovernor } from '../hooks/useGovernor';
 import { ChevronLeft, ChevronRight, Play, Pause, Home, Maximize2, Minimize2, Volume2, VolumeX, Clock, Scissors } from 'lucide-react';
 import QuizBlock from '../components/QuizBlock';
 import AudioPlayer from '../components/AudioPlayer';
@@ -54,6 +55,14 @@ export default function UnifiedPlayer() {
         totalDisplay,
     } = useSalonMode(block, audioRef, goToNextBlock);
 
+    // Governor - enforces minimum time before advancement
+    const {
+        canAdvance,
+        timeRemaining: governorTimeRemaining,
+        timeRemainingDisplay,
+        progressPercent: governorProgress,
+    } = useGovernor(block, audioRef, blocks.length);
+
     // Start tracking when block loads
     useEffect(() => {
         if (currentBlockId) {
@@ -97,7 +106,8 @@ export default function UnifiedPlayer() {
         setVideoProgress(0);
     }, [currentHour, currentBlockIndex]);
 
-    // Auto-cycle images when Salon Mode is enabled
+    // Auto-cycle images - PROPORTIONAL to audio duration
+    // 3 images over 60s = 20s each (evenly distributed)
     useEffect(() => {
         if (!salonModeEnabled || !block?.imageUrls?.length) return;
         if (block.videoUrl || block.youtubeUrl) return; // Don't cycle if video block
@@ -105,13 +115,18 @@ export default function UnifiedPlayer() {
         const imageCount = block.imageUrls.length;
         if (imageCount <= 1) return;
 
-        // Cycle every 8 seconds
+        // Calculate interval: blockTotalTime (with +17%) / imageCount
+        // blockTotalTime is in seconds, convert to ms
+        const intervalMs = blockTotalTime > 0
+            ? Math.floor((blockTotalTime * 1000) / imageCount)
+            : 8000; // Fallback to 8s if no duration
+
         const cycleInterval = setInterval(() => {
             setImageIndex(prev => (prev + 1) % imageCount);
-        }, 8000);
+        }, intervalMs);
 
         return () => clearInterval(cycleInterval);
-    }, [salonModeEnabled, block?.imageUrls?.length, block?.videoUrl, block?.youtubeUrl]);
+    }, [salonModeEnabled, block?.imageUrls?.length, block?.videoUrl, block?.youtubeUrl, blockTotalTime]);
 
     // Video time tracking
     useEffect(() => {
@@ -466,9 +481,18 @@ export default function UnifiedPlayer() {
 
                         <button
                             onClick={goToNextBlock}
-                            className="px-6 py-3 bg-purple-600 rounded-xl hover:bg-purple-700 transition-colors flex items-center gap-2"
+                            disabled={!canAdvance && !salonModeEnabled}
+                            title={!canAdvance ? `Wait ${timeRemainingDisplay} to continue` : 'Next block'}
+                            className={`px-6 py-3 rounded-xl transition-colors flex items-center gap-2 ${canAdvance || salonModeEnabled
+                                    ? 'bg-purple-600 hover:bg-purple-700'
+                                    : 'bg-gray-600 cursor-not-allowed opacity-60'
+                                }`}
                         >
-                            Next <ChevronRight size={20} />
+                            {!canAdvance && !salonModeEnabled ? (
+                                <><Clock size={16} /> {timeRemainingDisplay}</>
+                            ) : (
+                                <>Next <ChevronRight size={20} /></>
+                            )}
                         </button>
                     </div>
                 </div>
