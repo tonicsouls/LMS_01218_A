@@ -1,0 +1,19 @@
+{
+    "block_id": "block_002",
+    "hour": 2,
+    "title": "The Chair of Trust - Signs of Human Trafficking",
+    "duration_minutes": 5,
+    "tdlr_citation": "Texas HB 2059",
+    "media_type": "youtube",
+    "content": {
+        "scenario": "A client sits in your chair. She seems nervous, avoids eye contact, and has bruises she dismisses as 'clumsiness.' She checks her phone frequently, looking anxious whenever it buzzes.",
+        "connection": "As a cosmetology professional, you are uniquely positioned to observe warning signs. The salon chair creates a rare moment of trust and intimacy where victims may feel safe enough to reveal their situation.",
+        "law": "Texas law requires cosmetology professionals to complete training on recognizing warning signs of human trafficking. Being aware of these signs can save lives."
+    },
+    "assets": {
+        "images": null,
+        "audio": null,
+        "video": null,
+        "youtube": "https://youtu.be/aG1Jd3PF-JU"
+    }
+}

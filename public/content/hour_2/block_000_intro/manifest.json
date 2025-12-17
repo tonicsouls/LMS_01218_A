@@ -1,0 +1,18 @@
+{
+    "block_id": "block_000_intro",
+    "hour": 2,
+    "title": "Human Trafficking - Session 1",
+    "duration_minutes": 7,
+    "tdlr_citation": "Texas HB 2059",
+    "media_type": "video",
+    "content": {
+        "scenario": "Welcome to Hour 2: Recognizing and Responding to Human Trafficking. This important session will equip you with the knowledge to identify potential signs of trafficking and understand your role as a cosmetology professional.",
+        "connection": "As a cosmetology professional, you have a unique position. Clients may confide in you, and you may observe warning signs that others miss. The chair of trust you create is more than comfort—it can be a lifeline.",
+        "law": "Texas law requires cosmetology professionals to complete training on recognizing and reporting human trafficking. This is mandated under HB 2059."
+    },
+    "assets": {
+        "images": null,
+        "audio": null,
+        "video": "video.mp4"
+    }
+}

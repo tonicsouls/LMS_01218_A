@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+/**
+ * PHOENIX UNIFIED - Global Styles
+ */
+
+:root {
+  --primary: #9d51fb;
+  --accent: #4f46e5;
+  --bg-base: #111827;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-base);
+  color: white;
+}
