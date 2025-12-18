@@ -129,8 +129,8 @@ export default function UnifiedPlayer() {
     }, [currentHour, currentBlockIndex]);
 
     // Auto-cycle images - PROPORTIONAL to audio duration
-    // 3 images over 60s = 20s each (evenly distributed)
-    // FIXED: Only start cycling once blockTotalTime is calculated (> 0)
+    // 3 images over 60s = 20s each, NO LOOPING - stops on last image
+    // The 7% buffer provides reading time after last image
     useEffect(() => {
         if (!salonModeEnabled || !block?.imageUrls?.length) return;
         if (block.videoUrl || block.youtubeUrl) return; // Don't cycle if video block
@@ -139,21 +139,40 @@ export default function UnifiedPlayer() {
         if (imageCount <= 1) return;
 
         // Wait for blockTotalTime to be calculated from audio
-        // If still 0, don't start cycling yet - wait for audio to load
         if (blockTotalTime <= 0) {
             console.log('Image cycling: waiting for audio duration...');
             return;
         }
 
-        // Calculate interval: blockTotalTime (with +17%) / imageCount
-        const intervalMs = Math.floor((blockTotalTime * 1000) / imageCount);
-        console.log(`Image cycling: ${imageCount} images over ${blockTotalTime}s = ${intervalMs}ms each`);
+        // Calculate interval based on RAW audio time (blockTotalTime / 1.07 removes buffer)
+        // Then divide by image count for fractional distribution
+        const rawAudioTime = Math.floor(blockTotalTime / 1.07); // Remove 7% buffer
+        const intervalMs = Math.floor((rawAudioTime * 1000) / imageCount);
+        console.log(`Image cycling: ${imageCount} images over ${rawAudioTime}s = ${intervalMs}ms each`);
+
+        let stopped = false;
 
         const cycleInterval = setInterval(() => {
-            setImageIndex(prev => (prev + 1) % imageCount);
+            if (stopped) return;
+
+            setImageIndex(prev => {
+                const nextIndex = prev + 1;
+                // STOP on last image - no looping
+                if (nextIndex >= imageCount) {
+                    console.log(`Image cycling: Reached last image (${imageCount}/${imageCount})`);
+                    stopped = true;
+                    clearInterval(cycleInterval);
+                    return prev; // Stay on last image
+                }
+                console.log(`Image cycling: Image ${nextIndex + 1}/${imageCount}`);
+                return nextIndex;
+            });
         }, intervalMs);
 
-        return () => clearInterval(cycleInterval);
+        return () => {
+            stopped = true;
+            clearInterval(cycleInterval);
+        };
     }, [salonModeEnabled, block?.imageUrls?.length, block?.videoUrl, block?.youtubeUrl, blockTotalTime]);
 
     // Video time tracking

@@ -8,7 +8,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-const BUFFER_PERCENT = 0.17; // 17% extra time (superior timing)
+const BUFFER_PERCENT = 0.07; // 7% extra time for reading after images finish
 
 export function useSalonMode(block, audioRef, onAutoAdvance) {
     const [salonModeEnabled, setSalonModeEnabled] = useState(false);
