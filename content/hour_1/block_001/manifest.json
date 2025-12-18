@@ -1,0 +1,22 @@
+{
+    "block_id": "block_001",
+    "hour": 1,
+    "title": "Introduction to Health and Safety Definitions",
+    "duration_minutes": 4,
+    "tdlr_citation": "§83.100",
+    "media_type": "images",
+    "content": {
+        "scenario": "Welcome! You are an Empowered Pro. You don't just 'do' cosmetology; you master it. Today isn't about memorizing rules; it's about understanding the 'why' so you never have to waste time memorizing the 'what.' We are covering 9 essential habits for a clean, compliant, and successful salon.",
+        "connection": "Mastering these terms is not just about avoiding violations; it is about building trust with your clients and creating a reputation for excellence. Every time you correctly cleanse, disinfect, or choose the right product, you are reinforcing your status as an Empowered Pro who prioritizes health and safety.",
+        "law": "TDLR §83.100 provides the foundational health and safety definitions that govern the cosmetology industry in Texas."
+    },
+    "assets": {
+        "images": [
+            "slide_a.jpeg",
+            "slide_b.jpeg",
+            "slide_c.jpeg"
+        ],
+        "audio": "audio.wav",
+        "video": null
+    }
+}
