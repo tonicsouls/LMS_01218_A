@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useBlock, getBlocksForHour } from '../hooks/useBlock';
 import { useProgressStore } from '../stores/ProgressStore';
 import { useSalonMode } from '../hooks/useSalonMode';
@@ -15,7 +16,13 @@ import QuizBlock from '../components/QuizBlock';
 import AudioPlayer from '../components/AudioPlayer';
 
 export default function UnifiedPlayer() {
-    const [currentHour, setCurrentHour] = useState(1);
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+
+    // Read hour from URL param, default to 1
+    const initialHour = parseInt(searchParams.get('hour')) || 1;
+
+    const [currentHour, setCurrentHour] = useState(initialHour);
     const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
     const [textIndex, setTextIndex] = useState(0);
     const [imageIndex, setImageIndex] = useState(0);
@@ -49,6 +56,7 @@ export default function UnifiedPlayer() {
         salonModeEnabled,
         toggleSalonMode,
         blockTimeRemaining,
+        blockTotalTime,      // Added - needed for image cycling
         progressPercent,
         isAlmostDone,
         timeDisplay,
@@ -215,7 +223,7 @@ export default function UnifiedPlayer() {
             <header className="sticky top-0 z-50 bg-gray-900/90 backdrop-blur-md border-b border-white/10 px-6 py-4">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <button className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                        <button onClick={() => navigate('/launch')} className="p-2 hover:bg-white/10 rounded-lg transition-colors" title="Back to menu">
                             <Home size={20} />
                         </button>
                         <div>
@@ -484,8 +492,8 @@ export default function UnifiedPlayer() {
                             disabled={!canAdvance && !salonModeEnabled}
                             title={!canAdvance ? `Wait ${timeRemainingDisplay} to continue` : 'Next block'}
                             className={`px-6 py-3 rounded-xl transition-colors flex items-center gap-2 ${canAdvance || salonModeEnabled
-                                    ? 'bg-purple-600 hover:bg-purple-700'
-                                    : 'bg-gray-600 cursor-not-allowed opacity-60'
+                                ? 'bg-purple-600 hover:bg-purple-700'
+                                : 'bg-gray-600 cursor-not-allowed opacity-60'
                                 }`}
                         >
                             {!canAdvance && !salonModeEnabled ? (
