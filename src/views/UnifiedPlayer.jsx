@@ -377,7 +377,7 @@ export default function UnifiedPlayer() {
                                 <AudioPlayer
                                     ref={audioRef}
                                     src={block.audioUrl}
-                                    autoPlay={salonModeEnabled}
+                                    autoPlay={false}
                                     onDurationChange={(duration) => {
                                         console.log('Audio duration:', duration);
                                     }}
@@ -428,14 +428,13 @@ export default function UnifiedPlayer() {
                 )}
             </main>
 
-            {/* FOOTER - With Salon Mode Progress Bar */}
+            {/* FOOTER - With Governor Progress Bar */}
             <footer className="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-md border-t border-white/10">
-                {/* Salon Mode Progress Bar - Always Visible */}
+                {/* Governor Progress Bar - Always Visible */}
                 <div className="w-full h-2 bg-gray-800">
                     <div
-                        className={`h-full transition-all duration-1000 ${isAlmostDone ? 'bg-orange-500 animate-pulse' : 'bg-purple-500'
-                            }`}
-                        style={{ width: `${progressPercent}%` }}
+                        className="h-full transition-all duration-1000 bg-purple-500"
+                        style={{ width: `${governorProgress}%` }}
                     />
                 </div>
 
@@ -449,42 +448,25 @@ export default function UnifiedPlayer() {
                             <ChevronLeft size={20} /> Previous
                         </button>
 
-                        {/* Center - Block Info + Salon Mode Toggle */}
+                        {/* Center - Block Info */}
                         <div className="flex items-center gap-4">
                             <div className="text-center">
                                 <div className="text-sm text-gray-400">
                                     Hour {currentHour} • Block {currentBlockIndex + 1} of {blocks.length}
                                 </div>
-                                {salonModeEnabled && (
-                                    <div className={`text-xs font-mono ${isAlmostDone ? 'text-orange-400' : 'text-purple-400'}`}>
-                                        Auto-advance in {timeDisplay}
-                                    </div>
-                                )}
                             </div>
-
-                            {/* Salon Mode Toggle - Scissors Button (no jumping, just color change) */}
-                            <button
-                                onClick={toggleSalonMode}
-                                title={salonModeEnabled ? 'Salon Mode ON' : 'Salon Mode OFF'}
-                                className={`p-3 rounded-xl transition-colors ${salonModeEnabled
-                                    ? 'bg-purple-600 text-white'
-                                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                                    }`}
-                            >
-                                <Scissors size={20} />
-                            </button>
                         </div>
 
                         <button
                             onClick={goToNextBlock}
-                            disabled={!canAdvance && !salonModeEnabled}
+                            disabled={!canAdvance}
                             title={!canAdvance ? `Wait ${timeRemainingDisplay} to continue` : 'Next block'}
-                            className={`px-6 py-3 rounded-xl transition-colors flex items-center gap-2 ${canAdvance || salonModeEnabled
+                            className={`px-6 py-3 rounded-xl transition-colors flex items-center gap-2 ${canAdvance
                                 ? 'bg-purple-600 hover:bg-purple-700'
                                 : 'bg-gray-600 cursor-not-allowed opacity-60'
                                 }`}
                         >
-                            {!canAdvance && !salonModeEnabled ? (
+                            {!canAdvance ? (
                                 <><Clock size={16} /> {timeRemainingDisplay}</>
                             ) : (
                                 <>Next <ChevronRight size={20} /></>
