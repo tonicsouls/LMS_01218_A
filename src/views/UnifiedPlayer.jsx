@@ -10,7 +10,8 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useBlock, getBlocksForHour } from '../hooks/useBlock';
 import { useProgressStore } from '../stores/ProgressStore';
 import { useGovernor } from '../hooks/useGovernor';
-import { ChevronLeft, ChevronRight, Play, Pause, Home, Maximize2, Minimize2, Volume2, VolumeX, Clock } from 'lucide-react';
+import { useDevMode } from '../hooks/useDevMode';
+import { ChevronLeft, ChevronRight, Play, Pause, Home, Maximize2, Minimize2, Volume2, VolumeX, Clock, Zap } from 'lucide-react';
 import QuizBlock from '../components/QuizBlock';
 import AudioPlayer from '../components/AudioPlayer';
 
@@ -60,6 +61,9 @@ export default function UnifiedPlayer() {
         timeRemainingDisplay,
         progressPercent: governorProgress,
     } = useGovernor(block, audioRef, blocks.length);
+
+    // DEV MODE - bypasses governor timer (Ctrl+Shift+D to toggle)
+    const { devModeEnabled, toggleDevMode, isDevModeAvailable } = useDevMode();
 
     // Start tracking when block loads
     useEffect(() => {
@@ -448,25 +452,41 @@ export default function UnifiedPlayer() {
                             <ChevronLeft size={20} /> Previous
                         </button>
 
-                        {/* Center - Block Info */}
+                        {/* Center - Block Info + DEV MODE Toggle */}
                         <div className="flex items-center gap-4">
                             <div className="text-center">
                                 <div className="text-sm text-gray-400">
                                     Hour {currentHour} • Block {currentBlockIndex + 1} of {blocks.length}
                                 </div>
                             </div>
+
+                            {/* DEV MODE Toggle - Zap Button */}
+                            {isDevModeAvailable && (
+                                <button
+                                    onClick={toggleDevMode}
+                                    title={devModeEnabled ? 'DEV MODE ON (Ctrl+Shift+D)' : 'DEV MODE OFF (Ctrl+Shift+D)'}
+                                    className={`p-3 rounded-xl transition-colors ${devModeEnabled
+                                        ? 'bg-yellow-500 text-black animate-pulse'
+                                        : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                                        }`}
+                                >
+                                    <Zap size={20} />
+                                </button>
+                            )}
                         </div>
 
                         <button
                             onClick={goToNextBlock}
-                            disabled={!canAdvance}
-                            title={!canAdvance ? `Wait ${timeRemainingDisplay} to continue` : 'Next block'}
-                            className={`px-6 py-3 rounded-xl transition-colors flex items-center gap-2 ${canAdvance
-                                ? 'bg-purple-600 hover:bg-purple-700'
+                            disabled={!canAdvance && !devModeEnabled}
+                            title={devModeEnabled ? 'DEV MODE: Skip enabled' : (!canAdvance ? `Wait ${timeRemainingDisplay} to continue` : 'Next block')}
+                            className={`px-6 py-3 rounded-xl transition-colors flex items-center gap-2 ${canAdvance || devModeEnabled
+                                ? devModeEnabled ? 'bg-yellow-500 text-black hover:bg-yellow-600' : 'bg-purple-600 hover:bg-purple-700'
                                 : 'bg-gray-600 cursor-not-allowed opacity-60'
                                 }`}
                         >
-                            {!canAdvance ? (
+                            {devModeEnabled ? (
+                                <>⚡ SKIP<ChevronRight size={20} /></>
+                            ) : !canAdvance ? (
                                 <><Clock size={16} /> {timeRemainingDisplay}</>
                             ) : (
                                 <>Next <ChevronRight size={20} /></>
