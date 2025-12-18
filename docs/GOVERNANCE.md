@@ -1,4 +1,7 @@
 # GOVERNANCE.md - Timer & Compliance Rules
+## Updated: 2025-12-17 19:38
+
+---
 
 ## Overview
 
@@ -31,48 +34,92 @@ minTime = 3600 / blocksInHour; // in seconds
 | `canAdvance = false` | Gray, disabled, shows countdown | Cannot click |
 | `canAdvance = true` | Purple, enabled, shows "Next" | Can advance |
 | `salonModeEnabled` | Purple, auto-advances | Hands-free |
+| `devModeEnabled` | ⚡ Yellow, shows "SKIP" | Instant advance |
 
 ---
 
-## 2. +17% Buffer Rule
+## 2. +7% Buffer Rule
 
-All block durations include a 17% buffer for reading/comprehension:
+All block durations include a **7%** buffer for reading/comprehension:
 
 ```javascript
-const BUFFER_PERCENT = 0.17; // 17% extra time (superior timing)
+const BUFFER_PERCENT = 0.07; // 7% extra time
 const blockDuration = audioDuration * (1 + BUFFER_PERCENT);
 ```
 
 ### Examples
 
-| Audio Duration | +17% Buffer | Total Block Time |
-|----------------|-------------|------------------|
-| 52 seconds | +9 seconds | 61 seconds |
-| 100 seconds | +17 seconds | 117 seconds |
-| 60 seconds | +10 seconds | 70 seconds |
+| Audio Duration | +7% Buffer | Total Block Time |
+|----------------|------------|------------------|
+| 53 seconds | +3.7 seconds | 56.7 seconds |
+| 100 seconds | +7 seconds | 107 seconds |
+| 60 seconds | +4.2 seconds | 64.2 seconds |
 
 ---
 
 ## 3. Image Distribution
 
-Images are distributed **proportionally** across the block duration:
+Images are distributed **proportionally** across the **raw audio duration** (not buffered time):
 
 ```javascript
-const imageInterval = blockTotalTime / imageCount;
-// 60 seconds / 3 images = 20 seconds per image
+// Remove buffer to get raw audio time
+const rawAudioTime = blockTotalTime / 1.07;
+
+// Distribute images across raw audio
+const imageInterval = rawAudioTime / imageCount;
+
+// 53s audio / 3 images = ~17.6s per image
 ```
+
+### Key Behavior
+
+- **NO LOOPING**: Images stop on the last one
+- **Buffer provides reading time** after last image
+- **Only runs in Salon Mode**
 
 ### Examples
 
-| Block Duration | Image Count | Time Per Image |
-|----------------|-------------|----------------|
-| 60s | 3 | 20s each |
-| 117s | 4 | 29s each |
-| 70s | 5 | 14s each |
+| Audio | Images | Interval | Stops At |
+|-------|--------|----------|----------|
+| 53s | 3 | 17.6s | Image 3 |
+| 100s | 4 | 25s | Image 4 |
+| 60s | 5 | 12s | Image 5 |
+
+### Timeline Example (3 images, 53s audio)
+
+```
+0.0s  → Image 1 shown
+17.6s → Image 2 shown
+35.2s → Image 3 shown (STOPS HERE - no loop)
+53.0s → Audio ends, 7% buffer begins
+56.7s → Block timer ends, can advance
+```
 
 ---
 
-## 4. TDLR Compliance
+## 4. DEV MODE
+
+For development/testing, DEV MODE bypasses all timers:
+
+### Activation
+- **Keyboard**: Ctrl+Shift+D
+- **Button**: Click ⚡ Zap icon in footer
+
+### Behavior
+- Button turns yellow with pulse animation
+- Shows "⚡ SKIP" instead of countdown
+- Allows immediate advancement
+
+### Production Disable
+
+```javascript
+// In src/hooks/useDevMode.js line 10:
+const DEV_MODE_AVAILABLE = false; // Hides toggle entirely
+```
+
+---
+
+## 5. TDLR Compliance
 
 ### Requirements
 
@@ -91,13 +138,13 @@ The `ProgressStore` tracks:
 
 ---
 
-## 5. Salon Mode (Auto-Progression)
+## 6. Salon Mode (Auto-Progression)
 
 When enabled (scissors button):
 - Audio auto-plays
-- Images auto-cycle proportionally
+- Images auto-cycle proportionally (stops on last)
 - Auto-advances to next block when timer completes
-- Still respects +17% buffer
+- Respects +7% buffer
 
 ---
 
@@ -121,12 +168,27 @@ const {
     salonModeEnabled,     // Boolean: auto-mode on?
     toggleSalonMode,      // Function to toggle
     blockTimeRemaining,   // Seconds in current block
+    blockTotalTime,       // Total seconds (with 7% buffer)
     progressPercent,      // 0-100 progress
     isAlmostDone,         // True when <10s remaining
 } = useSalonMode(block, audioRef, onAutoAdvance);
 ```
 
+### useDevMode.js
+
+```javascript
+const {
+    devModeEnabled,       // Boolean: dev mode on?
+    toggleDevMode,        // Function to toggle
+    isDevModeAvailable,   // Boolean: feature available?
+} = useDevMode();
+```
+
 ---
 
-## Last Updated
-2025-12-17T17:05:00
+## Change Log
+
+| Date | Change |
+|------|--------|
+| 2025-12-17 19:38 | Updated buffer from 17% to 7%, added DEV MODE, image no-loop |
+| 2025-12-17 17:05 | Initial document creation |
