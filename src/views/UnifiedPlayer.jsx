@@ -9,10 +9,9 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useBlock, getBlocksForHour } from '../hooks/useBlock';
 import { useProgressStore } from '../stores/ProgressStore';
-import { useSalonMode } from '../hooks/useSalonMode';
 import { useGovernor } from '../hooks/useGovernor';
 import { useDevMode } from '../hooks/useDevMode';
-import { ChevronLeft, ChevronRight, Play, Pause, Home, Maximize2, Minimize2, Volume2, VolumeX, Clock, Scissors, Zap } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Pause, Home, Maximize2, Minimize2, Volume2, VolumeX, Clock, Zap } from 'lucide-react';
 import QuizBlock from '../components/QuizBlock';
 import AudioPlayer from '../components/AudioPlayer';
 
@@ -52,17 +51,8 @@ export default function UnifiedPlayer() {
         }
     }, [currentBlockIndex, blocks.length, currentHour]);
 
-    // Salon Mode - auto-progression
-    const {
-        salonModeEnabled,
-        toggleSalonMode,
-        blockTimeRemaining,
-        blockTotalTime,      // Added - needed for image cycling
-        progressPercent,
-        isAlmostDone,
-        timeDisplay,
-        totalDisplay,
-    } = useSalonMode(block, audioRef, goToNextBlock);
+    // SALON MODE REMOVED - Manual interaction only
+    // Users click through content tabs and use arrows for images
 
     // Governor - enforces minimum time before advancement
     const {
@@ -118,46 +108,31 @@ export default function UnifiedPlayer() {
         setVideoProgress(0);
     }, [currentHour, currentBlockIndex]);
 
-    // Auto-cycle images - PROPORTIONAL to raw audio duration
-    // 3 images over 53s = ~17.6s each, stops on last image (no loop)
-    // The 7% buffer provides reading time after last image
+    // SIMPLE IMAGE CAROUSEL - Independent, always-on
+    // Cycles through images at a fixed interval (8s per image)
+    // NOT tied to Salon Mode or any timing logic
     useEffect(() => {
-        if (!salonModeEnabled || !block?.imageUrls?.length) return;
+        if (!block?.imageUrls?.length) return;
         if (block.videoUrl || block.youtubeUrl) return; // Don't cycle if video block
 
         const imageCount = block.imageUrls.length;
-        if (imageCount <= 1) return;
+        if (imageCount <= 1) return; // No cycling needed for single image
 
-        // Wait for blockTotalTime to be calculated
-        if (blockTotalTime <= 0) {
-            console.log('Image cycling: waiting for duration...');
-            return;
-        }
+        // Fixed interval: 8 seconds per image
+        const INTERVAL_MS = 8000;
 
-        // Use RAW audio time (remove 7% buffer) for image distribution
-        const rawAudioTime = Math.floor(blockTotalTime / 1.07);
-        const intervalMs = Math.floor((rawAudioTime * 1000) / imageCount);
-        console.log(`✅ Image cycling: ${imageCount} images over ${rawAudioTime}s = ${intervalMs}ms each`);
-
-        // Track how many transitions we've done
-        let transitionCount = 0;
-        const maxTransitions = imageCount - 1; // e.g., 3 images = 2 transitions (0→1, 1→2)
+        console.log(`🖼️ Image carousel: ${imageCount} images, ${INTERVAL_MS / 1000}s each`);
 
         const cycleInterval = setInterval(() => {
-            transitionCount++;
-            if (transitionCount >= maxTransitions) {
-                // We've reached the last image, stop cycling
-                setImageIndex(imageCount - 1);
-                console.log(`Image cycling: Stopped at image ${imageCount}/${imageCount}`);
-                clearInterval(cycleInterval);
-            } else {
-                setImageIndex(transitionCount);
-                console.log(`Image cycling: Image ${transitionCount + 1}/${imageCount}`);
-            }
-        }, intervalMs);
+            setImageIndex(prev => {
+                const next = (prev + 1) % imageCount;
+                console.log(`Image: ${next + 1}/${imageCount}`);
+                return next;
+            });
+        }, INTERVAL_MS);
 
         return () => clearInterval(cycleInterval);
-    }, [salonModeEnabled, block?.imageUrls?.length, block?.videoUrl, block?.youtubeUrl, blockTotalTime, block?.block_id]);
+    }, [block?.imageUrls?.length, block?.videoUrl, block?.youtubeUrl, block?.block_id]);
 
     // Video time tracking
     useEffect(() => {
@@ -490,24 +465,7 @@ export default function UnifiedPlayer() {
                                 <div className="text-sm text-gray-400">
                                     Hour {currentHour} • Block {currentBlockIndex + 1} of {blocks.length}
                                 </div>
-                                {salonModeEnabled && (
-                                    <div className={`text-xs font-mono ${isAlmostDone ? 'text-orange-400' : 'text-purple-400'}`}>
-                                        Auto-advance in {timeDisplay}
-                                    </div>
-                                )}
                             </div>
-
-                            {/* Salon Mode Toggle - Scissors Button (no jumping, just color change) */}
-                            <button
-                                onClick={toggleSalonMode}
-                                title={salonModeEnabled ? 'Salon Mode ON' : 'Salon Mode OFF'}
-                                className={`p-3 rounded-xl transition-colors ${salonModeEnabled
-                                    ? 'bg-purple-600 text-white'
-                                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                                    }`}
-                            >
-                                <Scissors size={20} />
-                            </button>
 
                             {/* DEV MODE Toggle - Zap Button */}
                             {isDevModeAvailable && (
@@ -526,16 +484,16 @@ export default function UnifiedPlayer() {
 
                         <button
                             onClick={goToNextBlock}
-                            disabled={!canAdvance && !salonModeEnabled && !devModeEnabled}
+                            disabled={!canAdvance && !devModeEnabled}
                             title={devModeEnabled ? 'DEV MODE: Skip enabled' : (!canAdvance ? `Wait ${timeRemainingDisplay} to continue` : 'Next block')}
-                            className={`px-6 py-3 rounded-xl transition-colors flex items-center gap-2 ${canAdvance || salonModeEnabled || devModeEnabled
+                            className={`px-6 py-3 rounded-xl transition-colors flex items-center gap-2 ${canAdvance || devModeEnabled
                                 ? devModeEnabled ? 'bg-yellow-500 text-black hover:bg-yellow-600' : 'bg-purple-600 hover:bg-purple-700'
                                 : 'bg-gray-600 cursor-not-allowed opacity-60'
                                 }`}
                         >
                             {devModeEnabled ? (
                                 <>⚡ SKIP<ChevronRight size={20} /></>
-                            ) : !canAdvance && !salonModeEnabled ? (
+                            ) : !canAdvance ? (
                                 <><Clock size={16} /> {timeRemainingDisplay}</>
                             ) : (
                                 <>Next <ChevronRight size={20} /></>
