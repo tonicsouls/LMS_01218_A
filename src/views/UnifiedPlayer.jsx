@@ -33,6 +33,7 @@ export default function UnifiedPlayer() {
     const [displayTime, setDisplayTime] = useState('0:00');
     const [audioDuration, setAudioDuration] = useState(0); // Managed here, passed to Governor
 
+
     // Progress tracking
     const { startBlock, recordBlockTime, markTabViewed, getFormattedTime, getRemainingTime } = useProgressStore();
 
@@ -113,9 +114,13 @@ export default function UnifiedPlayer() {
 
     // Auto-cycle images - PROPORTIONAL to audio duration
     // Distributes images evenly across audio duration + 7% buffer? NO, use RAW audio duration
+    // Auto-cycle images - PROPORTIONAL to audio duration
     useEffect(() => {
         if (!block?.imageUrls?.length) return;
         if (block.videoUrl || block.youtubeUrl) return; // Don't cycle if video block
+
+        // PAUSE SUPPORT: If audio block, pause carousel when audio paused
+        if (audioDuration > 0 && !isPlaying) return;
 
         const imageCount = block.imageUrls.length;
         if (imageCount <= 1) return;
@@ -126,39 +131,57 @@ export default function UnifiedPlayer() {
             ? Math.floor((audioDuration * 1000) / imageCount)
             : 8000;
 
-        console.log(`🖼️ Image carousel: ${imageCount} images over ${audioDuration}s = ${Math.round(intervalMs / 1000)}s each`);
-
-        // Track transitions
-        let transitionCount = 0;
-        const maxTransitions = imageCount - 1;
+        console.log(`🖼️ Image carousel: ${imageCount} images over ${audioDuration}s = ${Math.round(intervalMs / 1000)}s each. Playing: ${isPlaying}`);
 
         const cycleInterval = setInterval(() => {
-            transitionCount++;
-            if (audioDuration > 0 && transitionCount >= maxTransitions) {
-                // Stop at last image if we are timed to audio
-                setImageIndex(imageCount - 1);
-                clearInterval(cycleInterval);
-            } else {
-                // Loop if fallback (no audio) or just cycle
-                setImageIndex(prev => (prev + 1) % imageCount);
-            }
+            setImageIndex(currentIndex => {
+                // Stop at last image if directly timed to audio
+                if (audioDuration > 0 && currentIndex >= imageCount - 1) {
+                    clearInterval(cycleInterval);
+                    return currentIndex;
+                }
+                // Otherwise loop (fallback) or increment
+                return (currentIndex + 1) % imageCount;
+            });
         }, intervalMs);
 
         return () => clearInterval(cycleInterval);
-    }, [block?.imageUrls?.length, block?.videoUrl, block?.youtubeUrl, block?.block_id, audioDuration]);
+    }, [block?.imageUrls?.length, block?.videoUrl, block?.youtubeUrl, block?.block_id, audioDuration, isPlaying]);
 
-    // Video time tracking
+    // Sync Text Cards to Media Time (3 equal segments)
+    const syncTextToTime = useCallback((currentTime, totalDuration) => {
+        if (!totalDuration || totalDuration <= 0) return;
+
+        // Split duration into 3 segments (0-33%, 33-66%, 66-100%)
+        // limit to max index 2
+        const rawIndex = Math.floor((currentTime / totalDuration) * 3);
+        const newIndex = Math.min(rawIndex, 2);
+
+        setTextIndex(current => {
+            if (current !== newIndex) return newIndex;
+            return current;
+        });
+    }, []);
+
+    // Video time tracking & Text Sync
     useEffect(() => {
         if (!videoRef.current || !block?.videoUrl) return;
 
         const video = videoRef.current;
         const handleTimeUpdate = () => {
-            setVideoProgress((video.currentTime / video.duration) * 100 || 0);
+            const current = video.currentTime;
+            const duration = video.duration;
+            setVideoProgress((current / duration) * 100 || 0);
+            syncTextToTime(current, duration);
         };
 
         video.addEventListener('timeupdate', handleTimeUpdate);
         return () => video.removeEventListener('timeupdate', handleTimeUpdate);
-    }, [block?.videoUrl]);
+    }, [block?.videoUrl, syncTextToTime]);
+
+    const handleAudioTimeUpdate = useCallback((time) => {
+        syncTextToTime(time, audioDuration);
+    }, [syncTextToTime, audioDuration]);
 
 
     const goToPrevBlock = useCallback(() => {
@@ -290,6 +313,7 @@ export default function UnifiedPlayer() {
                                             ref={videoRef}
                                             src={block.videoUrl}
                                             className="w-full h-full object-contain"
+                                            autoPlay={true}
                                             onClick={togglePlayPause}
                                             onPlay={() => setIsPlaying(true)}
                                             onPause={() => setIsPlaying(false)}
@@ -400,11 +424,15 @@ export default function UnifiedPlayer() {
                                 <AudioPlayer
                                     ref={audioRef}
                                     src={block.audioUrl}
-                                    autoPlay={false}
+                                    autoPlay={true}
+                                    onTimeUpdate={(time) => syncTextToTime(time, audioDuration)}
                                     onDurationChange={(d) => {
                                         console.log('Audio duration update:', d);
                                         setAudioDuration(d);
                                     }}
+                                    onPlay={() => setIsPlaying(true)}
+                                    onPause={() => setIsPlaying(false)}
+                                    onEnded={() => setIsPlaying(false)}
                                 />
                             )}
                         </div>
@@ -499,9 +527,11 @@ export default function UnifiedPlayer() {
                             onClick={goToNextBlock}
                             disabled={!canAdvance && !devModeEnabled}
                             title={devModeEnabled ? 'DEV MODE: Skip enabled' : (!canAdvance ? `Wait ${timeRemainingDisplay} to continue` : 'Next block')}
-                            className={`px-6 py-3 rounded-xl transition-colors flex items-center gap-2 ${canAdvance || devModeEnabled
-                                ? devModeEnabled ? 'bg-yellow-500 text-black hover:bg-yellow-600' : 'bg-purple-600 hover:bg-purple-700'
-                                : 'bg-gray-600 cursor-not-allowed opacity-60'
+                            className={`px-6 py-3 rounded-xl transition-all duration-500 flex items-center gap-2 ${canAdvance || devModeEnabled
+                                ? devModeEnabled
+                                    ? 'bg-yellow-500 text-black hover:bg-yellow-600 shadow-[0_0_15px_rgba(234,179,8,0.5)]'
+                                    : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white shadow-[0_0_20px_rgba(147,51,234,0.6)] hover:shadow-[0_0_30px_rgba(147,51,234,0.8)] scale-105 animate-pulse'
+                                : 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
                                 }`}
                         >
                             {devModeEnabled ? (

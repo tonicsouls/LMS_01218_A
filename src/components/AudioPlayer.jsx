@@ -7,7 +7,7 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Volume2, VolumeX, Play, Pause } from 'lucide-react';
 
-const AudioPlayer = forwardRef(({ src, onEnded, onDurationChange, autoPlay = false }, ref) => {
+const AudioPlayer = forwardRef(({ src, onEnded, onDurationChange, onPlay, onPause, onTimeUpdate, autoPlay = false }, ref) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -31,6 +31,7 @@ const AudioPlayer = forwardRef(({ src, onEnded, onDurationChange, autoPlay = fal
         const handleTimeUpdate = () => {
             setCurrentTime(audio.currentTime);
             setProgress((audio.currentTime / audio.duration) * 100 || 0);
+            onTimeUpdate?.(audio.currentTime);
         };
 
         const handleLoadedMetadata = () => {
@@ -44,19 +45,21 @@ const AudioPlayer = forwardRef(({ src, onEnded, onDurationChange, autoPlay = fal
             onEnded?.();
         };
 
-        const handlePlay = () => setIsPlaying(true);
-        const handlePause = () => setIsPlaying(false);
+        const handlePlay = () => {
+            setIsPlaying(true);
+            onPlay?.();
+        };
+
+        const handlePause = () => {
+            setIsPlaying(false);
+            onPause?.();
+        };
 
         audio.addEventListener('timeupdate', handleTimeUpdate);
         audio.addEventListener('loadedmetadata', handleLoadedMetadata);
         audio.addEventListener('ended', handleEnded);
         audio.addEventListener('play', handlePlay);
         audio.addEventListener('pause', handlePause);
-
-        // Auto-play if enabled
-        if (autoPlay && src) {
-            audio.play().catch(() => { }); // Silently handle autoplay restrictions
-        }
 
         return () => {
             audio.removeEventListener('timeupdate', handleTimeUpdate);
@@ -65,14 +68,24 @@ const AudioPlayer = forwardRef(({ src, onEnded, onDurationChange, autoPlay = fal
             audio.removeEventListener('play', handlePlay);
             audio.removeEventListener('pause', handlePause);
         };
-    }, [src, autoPlay, onEnded, onDurationChange]);
+    }, [onEnded, onDurationChange, onTimeUpdate, onPlay, onPause]);
+
+    // Precise Autoplay Logic - Only runs when src changes or autoPlay becomes true
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio || !src) return;
+
+        if (autoPlay) {
+            audio.play().catch(() => { });
+        }
+    }, [src, autoPlay]);
 
     // Reset when src changes
     useEffect(() => {
         setProgress(0);
         setCurrentTime(0);
-        setIsPlaying(false);
-    }, [src]);
+        if (!autoPlay) setIsPlaying(false);
+    }, [src, autoPlay]);
 
     const togglePlay = () => {
         if (!audioRef.current) return;
@@ -108,7 +121,7 @@ const AudioPlayer = forwardRef(({ src, onEnded, onDurationChange, autoPlay = fal
 
     return (
         <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
-            <audio ref={audioRef} src={src} preload="metadata" />
+            <audio ref={audioRef} src={src} preload="metadata" loop={false} />
 
             {/* Play/Pause Button */}
             <button

@@ -318,3 +318,52 @@ done
 
 ## Last Updated
 2025-12-17T16:23:00
+
+---
+
+## Player Architecture & Timing Logic
+
+### Core Principles
+The Player is designed to be **Audio-Driven**. The audio file is the source of truth for all timing.
+
+### 1. The Trinity of Time
+There are three distinct time concepts in the player:
+
+1.  **Raw Audio Time (audioDuration)**: The actual length of the MP3/WAV file.
+2.  **Governor Time (minTime)**: The mandatory "compliance" time.
+    *   **Rule:** minTime = audioDuration + 7% Buffer
+    *   *Purpose:* Account for reading time after audio ends.
+3.  **Visual Time (carouselInterval)**: How long each image stays on screen.
+    *   **Rule:** carouselInterval = audioDuration / imageCount
+    *   *Purpose:* Ensure all images are shown evenly *during* the audio playback.
+
+### 2. Data Flow
+```mermaid
+graph TD
+    A[<AudioPlayer />] -->|onDurationChange| B(UnifiedPlayer State)
+    B -->|duration| C[useGovernor Hook]
+    B -->|duration| D[Image Carousel Effect]
+    
+    C -->|Calculation| E(minTime = duration * 1.07)
+    C -->|Validation| F{Can Advance?}
+    
+    D -->|Calculation| G(interval = duration / count)
+    D -->|Visual| H[Slide Transition]
+```
+
+### 3. Component Responsibility
+*   **UnifiedPlayer.jsx**: Orchestrator. Holds the `audioDuration` state to ensure synchronization.
+*   **useGovernor.js**: Logic Engine. Calculates the 7% buffer and tracks "Time Remaining".
+*   **useDevMode.js**: Override. Provides `devModeEnabled` to bypass Can Advance? checks.
+
+### 4. Image Carousel Behavior
+*   **Always On**: Runs automatically for all image blocks.
+*   **Proportional**: Adapts to audio length.
+*   **No Loop**: Stops at the last image to prevent jarring restarts during the 7% buffer silence.
+*   **Fallback**: If no audio exists, defaults to 8 seconds per image.
+
+### 5. Dev Mode
+*   **Toggle**: `Ctrl + Shift + D` or Click the ⚡ Zap icon.
+*   **Effect**: Ignores `timeRemaining` and enables the Next button immediately.
+
+---
