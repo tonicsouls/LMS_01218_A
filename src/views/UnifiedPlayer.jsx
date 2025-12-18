@@ -9,9 +9,8 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useBlock, getBlocksForHour } from '../hooks/useBlock';
 import { useProgressStore } from '../stores/ProgressStore';
-import { useSalonMode } from '../hooks/useSalonMode';
 import { useGovernor } from '../hooks/useGovernor';
-import { ChevronLeft, ChevronRight, Play, Pause, Home, Maximize2, Minimize2, Volume2, VolumeX, Clock, Scissors } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Pause, Home, Maximize2, Minimize2, Volume2, VolumeX, Clock } from 'lucide-react';
 import QuizBlock from '../components/QuizBlock';
 import AudioPlayer from '../components/AudioPlayer';
 
@@ -52,16 +51,7 @@ export default function UnifiedPlayer() {
     }, [currentBlockIndex, blocks.length, currentHour]);
 
     // Salon Mode - auto-progression
-    const {
-        salonModeEnabled,
-        toggleSalonMode,
-        blockTimeRemaining,
-        blockTotalTime,      // Added - needed for image cycling
-        progressPercent,
-        isAlmostDone,
-        timeDisplay,
-        totalDisplay,
-    } = useSalonMode(block, audioRef, goToNextBlock);
+    // SALON MODE REMOVED - Images auto-cycle always, user advances manually
 
     // Governor - enforces minimum time before advancement
     const {
