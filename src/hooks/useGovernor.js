@@ -11,30 +11,35 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-export function useGovernor(block, audioRef, blocksInHour = 15) {
+export function useGovernor(block, audioRef, blocksInHour = 15, externalDuration = 0) {
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const [canAdvance, setCanAdvance] = useState(false);
     const [timeRemaining, setTimeRemaining] = useState(0);
-    const [audioDuration, setAudioDuration] = useState(0);
+    const [internalDuration, setInternalDuration] = useState(0); // Renamed from audioDuration
     const intervalRef = useRef(null);
     const startTimeRef = useRef(null);
 
+    // Use external duration if provided (passed from UnifiedPlayer), otherwise internal
+    const durationToUse = externalDuration > 0 ? externalDuration : internalDuration;
+
     // Calculate minimum required time for this block
     const calculateMinTime = useCallback(() => {
-        // If audio exists, use audio duration
-        if (audioDuration > 0) {
-            return audioDuration;
+        // If audio exists, use duration + 7% BUFFER
+        if (durationToUse > 0) {
+            const BUFFER_PERCENT = 0.07;
+            const bufferedDuration = Math.ceil(durationToUse * (1 + BUFFER_PERCENT));
+            return bufferedDuration;
         }
 
         // Fallback: 60 minutes / blocks in hour = min per block
         // 60 min = 3600 seconds, 15 blocks = 240 seconds (4 min) per block
         const fallbackMinSeconds = Math.floor(3600 / blocksInHour);
         return fallbackMinSeconds;
-    }, [audioDuration, blocksInHour]);
+    }, [durationToUse, blocksInHour]);
 
     const minTimeSeconds = calculateMinTime();
 
-    // Track audio duration when loaded
+    // Track audio duration when loaded (Backup/Legacy support)
     useEffect(() => {
         if (!audioRef?.current) return;
 
@@ -42,13 +47,13 @@ export function useGovernor(block, audioRef, blocksInHour = 15) {
 
         const handleDurationChange = () => {
             if (audio.duration && !isNaN(audio.duration)) {
-                setAudioDuration(Math.ceil(audio.duration));
+                setInternalDuration(Math.ceil(audio.duration));
             }
         };
 
         // Check if already loaded
         if (audio.duration && !isNaN(audio.duration)) {
-            setAudioDuration(Math.ceil(audio.duration));
+            setInternalDuration(Math.ceil(audio.duration));
         }
 
         audio.addEventListener('loadedmetadata', handleDurationChange);
@@ -65,6 +70,7 @@ export function useGovernor(block, audioRef, blocksInHour = 15) {
         // Reset state
         setElapsedSeconds(0);
         setCanAdvance(false);
+        if (externalDuration === 0) setInternalDuration(0); // Reset internal if we might rely on it
         startTimeRef.current = Date.now();
 
         // Clear existing interval
@@ -113,7 +119,7 @@ export function useGovernor(block, audioRef, blocksInHour = 15) {
         minTimeSeconds,
         minTimeDisplay: formatTime(minTimeSeconds),
         progressPercent,
-        audioDuration,
+        audioDuration: durationToUse, // Return the actual duration being used
     };
 }
 

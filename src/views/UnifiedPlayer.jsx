@@ -31,6 +31,7 @@ export default function UnifiedPlayer() {
     const [isTheaterMode, setIsTheaterMode] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
     const [displayTime, setDisplayTime] = useState('0:00');
+    const [audioDuration, setAudioDuration] = useState(0); // Managed here, passed to Governor
 
     // Progress tracking
     const { startBlock, recordBlockTime, markTabViewed, getFormattedTime, getRemainingTime } = useProgressStore();
@@ -60,7 +61,9 @@ export default function UnifiedPlayer() {
         timeRemaining: governorTimeRemaining,
         timeRemainingDisplay,
         progressPercent: governorProgress,
-    } = useGovernor(block, audioRef, blocks.length);
+    } = useGovernor(block, audioRef, blocks.length, audioDuration);
+
+    console.log('UnifiedPlayer Render: audioDuration =', audioDuration);
 
     // DEV MODE - bypasses governor timer (Ctrl+Shift+D to toggle)
     const { devModeEnabled, toggleDevMode, isDevModeAvailable } = useDevMode();
@@ -108,8 +111,8 @@ export default function UnifiedPlayer() {
         setVideoProgress(0);
     }, [currentHour, currentBlockIndex]);
 
-    // Auto-cycle images - ALWAYS ON (8s per image)
-    // Cycles through all images continuously
+    // Auto-cycle images - PROPORTIONAL to audio duration
+    // Distributes images evenly across audio duration + 7% buffer? NO, use RAW audio duration
     useEffect(() => {
         if (!block?.imageUrls?.length) return;
         if (block.videoUrl || block.youtubeUrl) return; // Don't cycle if video block
@@ -117,16 +120,32 @@ export default function UnifiedPlayer() {
         const imageCount = block.imageUrls.length;
         if (imageCount <= 1) return;
 
-        // Fixed 8 second interval per image
-        const intervalMs = 8000;
-        console.log(`🖼️ Image carousel: ${imageCount} images, 8s each`);
+        // Calculate interval: Audio Duration / Image Count
+        // If no audio (duration=0), fallback to 8s
+        const intervalMs = audioDuration > 0
+            ? Math.floor((audioDuration * 1000) / imageCount)
+            : 8000;
+
+        console.log(`🖼️ Image carousel: ${imageCount} images over ${audioDuration}s = ${Math.round(intervalMs / 1000)}s each`);
+
+        // Track transitions
+        let transitionCount = 0;
+        const maxTransitions = imageCount - 1;
 
         const cycleInterval = setInterval(() => {
-            setImageIndex(prev => (prev + 1) % imageCount);
+            transitionCount++;
+            if (audioDuration > 0 && transitionCount >= maxTransitions) {
+                // Stop at last image if we are timed to audio
+                setImageIndex(imageCount - 1);
+                clearInterval(cycleInterval);
+            } else {
+                // Loop if fallback (no audio) or just cycle
+                setImageIndex(prev => (prev + 1) % imageCount);
+            }
         }, intervalMs);
 
         return () => clearInterval(cycleInterval);
-    }, [block?.imageUrls?.length, block?.videoUrl, block?.youtubeUrl, block?.block_id]);
+    }, [block?.imageUrls?.length, block?.videoUrl, block?.youtubeUrl, block?.block_id, audioDuration]);
 
     // Video time tracking
     useEffect(() => {
@@ -382,8 +401,9 @@ export default function UnifiedPlayer() {
                                     ref={audioRef}
                                     src={block.audioUrl}
                                     autoPlay={false}
-                                    onDurationChange={(duration) => {
-                                        console.log('Audio duration:', duration);
+                                    onDurationChange={(d) => {
+                                        console.log('Audio duration update:', d);
+                                        setAudioDuration(d);
                                     }}
                                 />
                             )}
