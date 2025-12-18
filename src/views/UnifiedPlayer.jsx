@@ -118,8 +118,9 @@ export default function UnifiedPlayer() {
         setVideoProgress(0);
     }, [currentHour, currentBlockIndex]);
 
-    // Auto-cycle images - PROPORTIONAL to audio duration
-    // 3 images over 60s = 20s each (evenly distributed)
+    // Auto-cycle images - PROPORTIONAL to raw audio duration
+    // 3 images over 53s = ~17.6s each, stops on last image (no loop)
+    // The 7% buffer provides reading time after last image
     useEffect(() => {
         if (!salonModeEnabled || !block?.imageUrls?.length) return;
         if (block.videoUrl || block.youtubeUrl) return; // Don't cycle if video block
@@ -127,18 +128,36 @@ export default function UnifiedPlayer() {
         const imageCount = block.imageUrls.length;
         if (imageCount <= 1) return;
 
-        // Calculate interval: blockTotalTime (with +17%) / imageCount
-        // blockTotalTime is in seconds, convert to ms
-        const intervalMs = blockTotalTime > 0
-            ? Math.floor((blockTotalTime * 1000) / imageCount)
-            : 8000; // Fallback to 8s if no duration
+        // Wait for blockTotalTime to be calculated
+        if (blockTotalTime <= 0) {
+            console.log('Image cycling: waiting for duration...');
+            return;
+        }
+
+        // Use RAW audio time (remove 7% buffer) for image distribution
+        const rawAudioTime = Math.floor(blockTotalTime / 1.07);
+        const intervalMs = Math.floor((rawAudioTime * 1000) / imageCount);
+        console.log(`✅ Image cycling: ${imageCount} images over ${rawAudioTime}s = ${intervalMs}ms each`);
+
+        // Track how many transitions we've done
+        let transitionCount = 0;
+        const maxTransitions = imageCount - 1; // e.g., 3 images = 2 transitions (0→1, 1→2)
 
         const cycleInterval = setInterval(() => {
-            setImageIndex(prev => (prev + 1) % imageCount);
+            transitionCount++;
+            if (transitionCount >= maxTransitions) {
+                // We've reached the last image, stop cycling
+                setImageIndex(imageCount - 1);
+                console.log(`Image cycling: Stopped at image ${imageCount}/${imageCount}`);
+                clearInterval(cycleInterval);
+            } else {
+                setImageIndex(transitionCount);
+                console.log(`Image cycling: Image ${transitionCount + 1}/${imageCount}`);
+            }
         }, intervalMs);
 
         return () => clearInterval(cycleInterval);
-    }, [salonModeEnabled, block?.imageUrls?.length, block?.videoUrl, block?.youtubeUrl, blockTotalTime]);
+    }, [salonModeEnabled, block?.imageUrls?.length, block?.videoUrl, block?.youtubeUrl, blockTotalTime, block?.block_id]);
 
     // Video time tracking
     useEffect(() => {
@@ -510,8 +529,8 @@ export default function UnifiedPlayer() {
                             disabled={!canAdvance && !salonModeEnabled && !devModeEnabled}
                             title={devModeEnabled ? 'DEV MODE: Skip enabled' : (!canAdvance ? `Wait ${timeRemainingDisplay} to continue` : 'Next block')}
                             className={`px-6 py-3 rounded-xl transition-colors flex items-center gap-2 ${canAdvance || salonModeEnabled || devModeEnabled
-                                    ? devModeEnabled ? 'bg-yellow-500 text-black hover:bg-yellow-600' : 'bg-purple-600 hover:bg-purple-700'
-                                    : 'bg-gray-600 cursor-not-allowed opacity-60'
+                                ? devModeEnabled ? 'bg-yellow-500 text-black hover:bg-yellow-600' : 'bg-purple-600 hover:bg-purple-700'
+                                : 'bg-gray-600 cursor-not-allowed opacity-60'
                                 }`}
                         >
                             {devModeEnabled ? (
