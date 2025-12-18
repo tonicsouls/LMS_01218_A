@@ -128,52 +128,61 @@ export default function UnifiedPlayer() {
         setVideoProgress(0);
     }, [currentHour, currentBlockIndex]);
 
-    // Auto-cycle images - PROPORTIONAL to audio duration
-    // 3 images over 60s = 20s each, NO LOOPING - stops on last image
-    // The 7% buffer provides reading time after last image
+    // Auto-cycle images - PROPORTIONAL to raw audio duration
+    // 3 images over 53s = ~17.6s each, NO LOOPING - stops on last image
+    // The 7% buffer (e.g., 3.7s on 53s audio) provides reading time after last image shows
+    const imageCycleRef = useRef({ interval: null, index: 0 });
+
     useEffect(() => {
+        // Clear any existing interval
+        if (imageCycleRef.current.interval) {
+            clearInterval(imageCycleRef.current.interval);
+            imageCycleRef.current.interval = null;
+        }
+
         if (!salonModeEnabled || !block?.imageUrls?.length) return;
-        if (block.videoUrl || block.youtubeUrl) return; // Don't cycle if video block
+        if (block.videoUrl || block.youtubeUrl) return;
 
         const imageCount = block.imageUrls.length;
         if (imageCount <= 1) return;
 
-        // Wait for blockTotalTime to be calculated from audio
         if (blockTotalTime <= 0) {
             console.log('Image cycling: waiting for audio duration...');
             return;
         }
 
-        // Calculate interval based on RAW audio time (blockTotalTime / 1.07 removes buffer)
-        // Then divide by image count for fractional distribution
-        const rawAudioTime = Math.floor(blockTotalTime / 1.07); // Remove 7% buffer
+        // Calculate interval based on RAW audio time (remove 7% buffer)
+        const rawAudioTime = Math.floor(blockTotalTime / 1.07);
         const intervalMs = Math.floor((rawAudioTime * 1000) / imageCount);
-        console.log(`Image cycling: ${imageCount} images over ${rawAudioTime}s = ${intervalMs}ms each`);
+        console.log(`✅ Image cycling: ${imageCount} images over ${rawAudioTime}s = ${intervalMs}ms each`);
 
-        let stopped = false;
+        // Reset index counter
+        imageCycleRef.current.index = 0;
+        setImageIndex(0);
 
-        const cycleInterval = setInterval(() => {
-            if (stopped) return;
+        imageCycleRef.current.interval = setInterval(() => {
+            const nextIndex = imageCycleRef.current.index + 1;
 
-            setImageIndex(prev => {
-                const nextIndex = prev + 1;
-                // STOP on last image - no looping
-                if (nextIndex >= imageCount) {
-                    console.log(`Image cycling: Reached last image (${imageCount}/${imageCount})`);
-                    stopped = true;
-                    clearInterval(cycleInterval);
-                    return prev; // Stay on last image
-                }
-                console.log(`Image cycling: Image ${nextIndex + 1}/${imageCount}`);
-                return nextIndex;
-            });
+            if (nextIndex >= imageCount) {
+                // Reached last image, stop cycling
+                console.log(`Image cycling: Stopped at image ${imageCount}/${imageCount}`);
+                clearInterval(imageCycleRef.current.interval);
+                imageCycleRef.current.interval = null;
+                return;
+            }
+
+            imageCycleRef.current.index = nextIndex;
+            setImageIndex(nextIndex);
+            console.log(`Image cycling: Image ${nextIndex + 1}/${imageCount}`);
         }, intervalMs);
 
         return () => {
-            stopped = true;
-            clearInterval(cycleInterval);
+            if (imageCycleRef.current.interval) {
+                clearInterval(imageCycleRef.current.interval);
+                imageCycleRef.current.interval = null;
+            }
         };
-    }, [salonModeEnabled, block?.imageUrls?.length, block?.videoUrl, block?.youtubeUrl, blockTotalTime]);
+    }, [salonModeEnabled, block?.imageUrls?.length, block?.videoUrl, block?.youtubeUrl, blockTotalTime, block?.block_id]);
 
     // Video time tracking
     useEffect(() => {
