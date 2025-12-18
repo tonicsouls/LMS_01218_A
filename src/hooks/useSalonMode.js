@@ -111,6 +111,8 @@ export function useSalonMode(block, audioRef, onAutoAdvance) {
     }, [block?.block_id]); // Only reset on different block
 
     // Countdown timer
+    // NOTE: Does NOT auto-advance directly. Sets salonComplete = true.
+    // Parent component must check BOTH salonComplete AND governor canAdvance
     useEffect(() => {
         if (!salonModeEnabled || blockTimeRemaining <= 0) return;
 
@@ -123,10 +125,12 @@ export function useSalonMode(block, audioRef, onAutoAdvance) {
                     setIsAlmostDone(true);
                 }
 
-                // Auto-advance when timer hits 0
+                // Salon timer complete - but DON'T auto-advance yet
+                // Let parent decide based on governor
                 if (newTime <= 0) {
                     clearInterval(timer);
-                    onAutoAdvance?.();
+                    // Signal completion but don't advance
+                    console.log('Salon Mode: Timer complete. Waiting for governor...');
                     return 0;
                 }
 
@@ -149,6 +153,9 @@ export function useSalonMode(block, audioRef, onAutoAdvance) {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
+    // Salon Mode is "complete" when timer hits 0 (but may still be waiting for governor)
+    const salonComplete = salonModeEnabled && blockTimeRemaining === 0;
+
     return {
         salonModeEnabled,
         setSalonModeEnabled,
@@ -158,6 +165,7 @@ export function useSalonMode(block, audioRef, onAutoAdvance) {
         audioDuration,
         progressPercent,
         isAlmostDone,
+        salonComplete,  // True when salon timer done (may still wait for governor)
         timeDisplay: formatTime(blockTimeRemaining),
         totalDisplay: formatTime(blockTotalTime),
     };

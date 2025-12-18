@@ -60,6 +60,7 @@ export default function UnifiedPlayer() {
         blockTotalTime,      // Added - needed for image cycling
         progressPercent,
         isAlmostDone,
+        salonComplete,       // True when salon timer done
         timeDisplay,
         totalDisplay,
     } = useSalonMode(block, audioRef, goToNextBlock);
@@ -74,6 +75,15 @@ export default function UnifiedPlayer() {
 
     // DEV MODE - bypasses governor timer (Ctrl+Shift+D to toggle)
     const { devModeEnabled, toggleDevMode, isDevModeAvailable } = useDevMode();
+
+    // COORDINATED AUTO-ADVANCE: Advance only when BOTH systems are ready
+    // Salon Mode finishes (audio + 17%) AND Governor allows (TDLR min time)
+    useEffect(() => {
+        if (salonComplete && canAdvance && salonModeEnabled) {
+            console.log('Both Salon Mode and Governor complete - auto-advancing!');
+            goToNextBlock();
+        }
+    }, [salonComplete, canAdvance, salonModeEnabled, goToNextBlock]);
 
     // Start tracking when block loads
     useEffect(() => {
@@ -515,8 +525,8 @@ export default function UnifiedPlayer() {
                             disabled={!canAdvance && !salonModeEnabled && !devModeEnabled}
                             title={devModeEnabled ? 'DEV MODE: Skip enabled' : (!canAdvance ? `Wait ${timeRemainingDisplay} to continue` : 'Next block')}
                             className={`px-6 py-3 rounded-xl transition-colors flex items-center gap-2 ${canAdvance || salonModeEnabled || devModeEnabled
-                                    ? devModeEnabled ? 'bg-yellow-500 text-black hover:bg-yellow-600' : 'bg-purple-600 hover:bg-purple-700'
-                                    : 'bg-gray-600 cursor-not-allowed opacity-60'
+                                ? devModeEnabled ? 'bg-yellow-500 text-black hover:bg-yellow-600' : 'bg-purple-600 hover:bg-purple-700'
+                                : 'bg-gray-600 cursor-not-allowed opacity-60'
                                 }`}
                         >
                             {devModeEnabled ? (
