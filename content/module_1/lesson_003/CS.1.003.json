@@ -1,0 +1,108 @@
+{
+    "lesson_id": "CS.1.003",
+    "lesson_title": "Subject Line Psy-Ops: Urgency & Fear",
+    "module_id": "CS.1",
+    "module_name": "Module 1: Phishing & Social Engineering",
+    "duration_minutes": 2.5,
+    "security_citation": "FBI IC3 Reports",
+    "atoms": [
+        {
+            "atom_id": "atom-CS-1-003-v1",
+            "atom_type": "visual",
+            "metadata": {
+                "prompt": "A stylized, glowing blue digital heart that rhythmically pulses and occasionally jitters with red static.",
+                "timestamp": "0s"
+            }
+        },
+        {
+            "atom_id": "atom-CS-1-003-v2",
+            "atom_type": "visual",
+            "metadata": {
+                "prompt": "A wireframe human brain with the amygdala (emotional center) glowing a violent, alarm-red.",
+                "timestamp": "21s"
+            }
+        },
+        {
+            "atom_id": "atom-CS-1-003-v3",
+            "atom_type": "visual",
+            "metadata": {
+                "prompt": "A close-up of a sharp, metallic fishing hook snagging a digital envelope icon from a stream of data.",
+                "timestamp": "42s"
+            }
+        },
+        {
+            "atom_id": "atom-CS-1-003-v4",
+            "atom_type": "visual",
+            "metadata": {
+                "prompt": "A dramatic, oversized digital countdown timer in a dark room, with red numbers reflecting off a glass surface.",
+                "timestamp": "63s"
+            }
+        },
+        {
+            "atom_id": "atom-CS-1-003-v5",
+            "atom_type": "visual",
+            "metadata": {
+                "prompt": "A first-person perspective of running down a corridor toward a bright red 'EXIT' sign that says 'CLICK HERE'.",
+                "timestamp": "84s"
+            }
+        },
+        {
+            "atom_id": "atom-CS-1-003-v6",
+            "atom_type": "visual",
+            "metadata": {
+                "prompt": "A classic stopwatch with a glass face being shattered by a glitching, digital mallet.",
+                "timestamp": "105s"
+            }
+        },
+        {
+            "atom_id": "atom-CS-1-003-v7",
+            "atom_type": "visual",
+            "metadata": {
+                "prompt": "A large, industrial-grade emergency brake handle being pulled back, with the text 'SYSTEM HALTED for ANALYSIS' appearing.",
+                "timestamp": "126s"
+            }
+        },
+        {
+            "atom_id": "atom-CS-1-003-script",
+            "atom_type": "script",
+            "content": {
+                "narrative": "Listen carefully. That pulse you feel in your chest? That's what the attacker is looking for. Social engineering is not a hack of your computer. It is a hack of your limbic system. The Subject Line is the hook. It is designed to induce an immediate emotional state: Urgency or Fear. 'Your account will be suspended in 24 hours.' 'Immediate Action Required.' When your brain perceives a threat, it moves from the logical prefrontal cortex to the reactive amygdala. You stop analyzing and start reacting. You click because you want the threat to vanish. The attacker's greatest enemy is Time. They need you to move fast. They need you to bypass your training before the logical sensors can kick in. The protocol is simple: Slow Down. A legitimate issue never requires clicking a link immediately from an email. Neutralize the emotion. Analyze the data.",
+                "persona_direction": "Rogue AI (The Glitch) - Psychological, urgent, authoritative.",
+                "speaker": "Rogue AI"
+            }
+        },
+        {
+            "atom_id": "atom-CS-1-003-audio",
+            "atom_type": "audio",
+            "asset_id": "asset-aud-CS1003.mp3",
+            "metadata": {
+                "linked_script_atom": "atom-CS-1-003-script"
+            }
+        },
+        {
+            "atom_id": "atom-CS-1-003-scroll",
+            "atom_type": "scrolling_text",
+            "content": [
+                "Tactic: Limbic System Exploit",
+                "Primary Triggers: Urgency and Fear",
+                "Attacker Goal: Bypass logical thinking",
+                "Defense: The 'Slower-Thinking' Protocol",
+                "Status: Emotional Sensor Calibration"
+            ]
+        },
+        {
+            "atom_id": "atom-CS-1-003-quiz",
+            "atom_type": "quiz",
+            "quiz_type": "multiple_choice",
+            "content": {
+                "question": "Why do attackers use subject lines that create a sense of urgency?",
+                "options": [
+                    "To ensure the email doesn't get marked as spam.",
+                    "To force you into an emotional state where you act reflexively instead of thinking logically.",
+                    "To comply with email delivery regulations."
+                ],
+                "correct_answer": "To force you into an emotional state where you act reflexively instead of thinking logically."
+            }
+        }
+    ]
+}

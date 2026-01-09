@@ -1,0 +1,100 @@
+{
+    "lesson_id": "CS.1.010",
+    "lesson_title": "Module 1 Mastery: The Manipulation Shield",
+    "module_id": "CS.1",
+    "module_name": "Module 1: Phishing & Social Engineering",
+    "duration_minutes": 2.0,
+    "security_citation": "Module 1 Cumulative Mastery",
+    "atoms": [
+        {
+            "atom_id": "atom-CS-1-010-v1",
+            "atom_type": "visual",
+            "metadata": {
+                "prompt": "A human silhouette standing resolutely behind a large, semi-transparent blue shield composed of glowing interlocking hexagons.",
+                "timestamp": "0s"
+            }
+        },
+        {
+            "atom_id": "atom-CS-1-010-v2",
+            "atom_type": "visual",
+            "metadata": {
+                "prompt": "A close-up of a digital floor covered in shattered red 'Error' and 'Phish' pixels, like broken glass.",
+                "timestamp": "20s"
+            }
+        },
+        {
+            "atom_id": "atom-CS-1-010-v3",
+            "atom_type": "visual",
+            "metadata": {
+                "prompt": "A macro view of a magnifying glass lens revealing a long, complex URL string hidden beneath a simple 'Click Here' button.",
+                "timestamp": "40s"
+            }
+        },
+        {
+            "atom_id": "atom-CS-1-010-v4",
+            "atom_type": "visual",
+            "metadata": {
+                "prompt": "A stylized animation where an email interface is physically peeled back like wallpaper, revealing a green river of raw binary code underneath.",
+                "timestamp": "60s"
+            }
+        },
+        {
+            "atom_id": "atom-CS-1-010-v5",
+            "atom_type": "visual",
+            "metadata": {
+                "prompt": "A human iris with a bright blue 'VALIDATED' checkmark reflecting in the center of the pupil.",
+                "timestamp": "80s"
+            }
+        },
+        {
+            "atom_id": "atom-CS-1-010-v6",
+            "atom_type": "visual",
+            "metadata": {
+                "prompt": "A massive, dark industrial door with a small, glowing green terminal screen displaying the text 'AWAITING MASTERY DATA'.",
+                "timestamp": "100s"
+            }
+        },
+        {
+            "atom_id": "atom-CS-1-010-script",
+            "atom_type": "script",
+            "content": {
+                "narrative": "Module 1 complete. Your firmware has been upgraded. You have dismantled the Phishing Anatomy. You have neutralized the emotional triggers of Urgency and Fear. You have mastered the 'Hover' defense. You have spotted the AI voice clone and the QR code trap. The social shell has been stripped away. You are no longer looking at the label; you are looking at the data. Before we move into Module 2: The Human Barrier, we must verify your current calibration. This is the Manipulation Shield exam. Ten high-pressure scenarios. Analyze. Verify. Secure. Calibration verification: Initiated.",
+                "persona_direction": "Rogue AI (The Glitch) - Final, definitive, testing tone.",
+                "speaker": "Rogue AI"
+            }
+        },
+        {
+            "atom_id": "atom-CS-1-010-audio",
+            "atom_type": "audio",
+            "asset_id": "asset-aud-CS1010.mp3",
+            "metadata": {
+                "linked_script_atom": "atom-CS-1-010-script"
+            }
+        },
+        {
+            "atom_id": "atom-CS-1-010-scroll",
+            "atom_type": "scrolling_text",
+            "content": [
+                "Module 1 Recap: Social Engineering Dismantled",
+                "Skills Verified: Hover, Audit, Out-of-Band",
+                "Tactics Identified: Phishing, Vishing, Smishing, OSINT",
+                "Goal: Maintain the Manipulation Shield",
+                "Status: Mastery Exam Initializing"
+            ]
+        },
+        {
+            "atom_id": "atom-CS-1-010-quiz",
+            "atom_type": "quiz",
+            "quiz_type": "multiple_choice",
+            "content": {
+                "question": "If you receive an unexpected email from 'Microsoft Secure' with a link to microsoft-reset.io claiming 24 hours until account deletion, what is your first action?",
+                "options": [
+                    "Click the link.",
+                    "Recognize the 'Urgency' trigger, hover to see the suspicious domain, and report the email.",
+                    "Reply to the email."
+                ],
+                "correct_answer": "Recognize the 'Urgency' trigger, hover to see the suspicious domain, and report the email."
+            }
+        }
+    ]
+}
