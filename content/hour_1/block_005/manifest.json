@@ -1,0 +1,38 @@
+{
+    "block_id": "block_005",
+    "hour": 1,
+    "title": "True or False Challenge",
+    "duration_minutes": 2,
+    "tdlr_citation": "§83.100",
+    "media_type": "quiz",
+    "content": {
+        "scenario": "Quick-fire round! Answer true or false to these sanitation statements.",
+        "connection": "These common misconceptions trip up many professionals. Master these and you'll never make these mistakes.",
+        "law": "Based on TDLR §83.100 health and safety definitions."
+    },
+    "quiz": [
+        {
+            "type": "true_false",
+            "question": "A UV sanitizer can be used to disinfect implements that have visible debris on them.",
+            "correct": false,
+            "explanation": "FALSE. UV sanitizers are ONLY for storing already-cleaned implements. They cannot disinfect dirty tools."
+        },
+        {
+            "type": "true_false",
+            "question": "Cleaning and disinfecting are the same thing.",
+            "correct": false,
+            "explanation": "FALSE. Cleaning removes debris. Disinfecting kills pathogens. Both steps are required."
+        },
+        {
+            "type": "true_false",
+            "question": "All implements must be cleaned before they can be disinfected.",
+            "correct": true,
+            "explanation": "TRUE. Debris can prevent disinfectants from reaching and killing pathogens."
+        }
+    ],
+    "assets": {
+        "images": null,
+        "audio": null,
+        "video": null
+    }
+}

@@ -1,0 +1,31 @@
+{
+    "block_id": "block_004",
+    "hour": 1,
+    "title": "Spot the Violation",
+    "duration_minutes": 3,
+    "tdlr_citation": "§83.100",
+    "media_type": "quiz",
+    "content": {
+        "scenario": "Can you identify which salon setup shows a health code violation?",
+        "connection": "Training your eye to spot violations helps you maintain a compliant workspace and protect your clients.",
+        "law": "TDLR §83.100 requires proper sanitation and storage procedures."
+    },
+    "quiz": [
+        {
+            "type": "image_select",
+            "question": "Which image shows an IMPROPER use of a UV sanitizer?",
+            "images": [
+                "/content/hour_1/block_001/slide_a.jpeg",
+                "/content/hour_1/block_001/slide_b.jpeg",
+                "/content/hour_1/block_002/slide_a.jpeg"
+            ],
+            "correct": 2,
+            "explanation": "The third image shows implements being placed in a UV sanitizer without being cleaned first - a violation!"
+        }
+    ],
+    "assets": {
+        "images": null,
+        "audio": null,
+        "video": null
+    }
+}

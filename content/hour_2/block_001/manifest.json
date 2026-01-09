@@ -1,0 +1,21 @@
+{
+    "block_id": "block_001",
+    "hour": 2,
+    "title": "Understanding the Signs",
+    "duration_minutes": 4,
+    "tdlr_citation": "Texas HB 2059",
+    "media_type": "images",
+    "content": {
+        "scenario": "After watching the introduction video, let's dive deeper into recognizing the signs of human trafficking in your salon environment.",
+        "connection": "Every interaction in your chair is an opportunity to observe. You are not expected to be an investigator, but being aware can make all the difference.",
+        "law": "Texas HB 2059 requires licensed cosmetologists to complete training on human trafficking awareness as part of continuing education."
+    },
+    "assets": {
+        "images": [
+            "slide_a.jpeg",
+            "slide_b.jpeg"
+        ],
+        "audio": null,
+        "video": null
+    }
+}

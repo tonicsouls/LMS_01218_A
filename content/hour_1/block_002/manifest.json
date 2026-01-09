@@ -1,0 +1,24 @@
+{
+    "block_id": "block_002",
+    "hour": 1,
+    "title": "Ultraviolet Sanitizer",
+    "duration_minutes": 4,
+    "tdlr_citation": "§83.100",
+    "media_type": "images",
+    "content": {
+        "scenario": "A cosmetology student asks you if they can use a UV sanitation device to disinfect metal shears after cutting a client's hair. They're excited because they saw a new one online for $29.99.",
+        "connection": "UV sanitizers are NOT a substitute for proper disinfection with EPA-registered solutions. As an Empowered Pro, you understand that ultraviolet light can only maintain cleanliness of already-sanitized items. Using UV on a dirty implement is like putting a bandage on before cleaning the wound.",
+        "law": "TDLR §83.100 specifies that UV sanitizers are only approved for storage of clean, sanitized implements. They are NOT for the sanitation, disinfection, or sterilization process itself."
+    },
+    "assets": {
+        "images": [
+            "slide_a.jpeg",
+            "slide_b.jpeg",
+            "slide_c.jpeg",
+            "slide_d.jpeg",
+            "slide_e.jpeg"
+        ],
+        "audio": "audio.wav",
+        "video": null
+    }
+}

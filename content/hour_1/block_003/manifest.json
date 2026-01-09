@@ -1,0 +1,44 @@
+{
+    "block_id": "block_003",
+    "hour": 1,
+    "title": "Knowledge Check: Multiple Choice",
+    "duration_minutes": 3,
+    "tdlr_citation": "§83.100",
+    "media_type": "quiz",
+    "content": {
+        "scenario": "Let's test your understanding of the health and safety definitions we've covered.",
+        "connection": "Answering these questions correctly shows you understand the core concepts that keep you and your clients safe.",
+        "law": "These questions are based on TDLR §83.100 requirements."
+    },
+    "quiz": [
+        {
+            "type": "multiple_choice",
+            "question": "What is the PRIMARY purpose of a UV sanitizer in a salon?",
+            "options": [
+                "To disinfect dirty implements",
+                "To sterilize implements for surgery",
+                "To store already-sanitized implements",
+                "To kill all bacteria instantly"
+            ],
+            "correct": 2,
+            "explanation": "UV sanitizers are only approved for STORAGE of clean, already-sanitized implements. They do not disinfect or sterilize."
+        },
+        {
+            "type": "multiple_choice",
+            "question": "Which of the following is the correct order for implement processing?",
+            "options": [
+                "Disinfect → Clean → Store",
+                "Clean → Disinfect → Store",
+                "Sterilize → Clean → Disinfect",
+                "Store → Clean → Disinfect"
+            ],
+            "correct": 1,
+            "explanation": "You must CLEAN (remove debris) first, then DISINFECT (kill pathogens), then STORE properly."
+        }
+    ],
+    "assets": {
+        "images": null,
+        "audio": null,
+        "video": null
+    }
+}
